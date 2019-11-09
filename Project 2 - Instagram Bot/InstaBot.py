@@ -77,16 +77,6 @@ class InstaBot:
         closeBtn = bot.find_element_by_css_selector('[aria-label=Close]')
         closeBtn.click()
 
-        #  Get Data Mining of followers User Account Urls
-        # followers = []
-        # for user in followersList.find_elements_by_css_selector('li'):
-        #     userLink = user.find_element_by_css_selector('a').get_attribute('href')
-        #     # print(userLink)
-        #     followers.append(userLink)
-        #     if (len(followers) == max):
-        #         break        
-        # print(followers)
-
     def getFollowerList(self, accountName, max):
         bot = self.bot
 
@@ -117,7 +107,7 @@ class InstaBot:
             followers.append(userLink)
             if (len(followers) == max):
                 break
-        # print(followers)
+        # print(followers) - add to external file instead
 
         closeBtn = bot.find_element_by_css_selector('[aria-label=Close]')
         closeBtn.click()
