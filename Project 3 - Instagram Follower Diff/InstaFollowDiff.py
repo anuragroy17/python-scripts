@@ -124,12 +124,6 @@ class InstaFollowDiff:
         self.closeBrowser()
 
 
-class unfollowers:
-    def __init__(self, name, url):
-        self.name = name
-        self.url = url
-
-
 try:
     username = input("Username: ")
     password = getpass.getpass()
