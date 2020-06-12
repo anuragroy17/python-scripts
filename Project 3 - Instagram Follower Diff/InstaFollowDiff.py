@@ -51,10 +51,12 @@ class InstaFollowDiff:
             "//a[contains(@href,'/following')]/span")
         following_button.click()
         following = self._get_names(int(following_button.text))
+        # print("following-"+str(len(following)))
         followers_button = bot.find_element_by_xpath(
             "//a[contains(@href,'/followers')]/span")
         followers_button.click()
         followers = self._get_names(int(followers_button.text))
+        # print("followers-"+str(len(followers)))
         not_following_back = [
             user for user in following if user not in followers]
 
@@ -62,7 +64,7 @@ class InstaFollowDiff:
             writer = csv.writer(file)
             writer.writerow(["Username", "Url"])
             for x in not_following_back:
-                writer.writerow([x, f'https://www.instagram.com/{x}/'])
+                writer.writerow([x[26:len(x)-1], x])
 
     def _get_names(self, count):
         sleep(3)
@@ -81,8 +83,18 @@ class InstaFollowDiff:
             links = list.find_elements_by_xpath("//li")
             loaded_names_count = len(links)
 
-        nameList = list.find_elements_by_tag_name('a')
-        names = [name.text for name in nameList if name.text != '']
+        sleep(4)
+
+        names = []
+        for user in list.find_elements_by_css_selector('li'):
+            userLink = user.find_element_by_css_selector(
+                'a').get_attribute('href')
+            # print(userLink)
+            names.append(userLink)
+            if (len(names) == count):
+                break
+        # nameList = list.find_elements_by_tag_name('a')
+        # names = [name.text for name in nameList if name.text != '']
         # close button
         closeBtn = bot.find_element_by_css_selector('[aria-label=Close]')
         closeBtn.click()
