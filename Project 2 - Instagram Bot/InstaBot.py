@@ -1,4 +1,3 @@
-
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -6,11 +5,9 @@ from selenium.webdriver.support.ui import WebDriverWait as wait
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import TimeoutException
 from time import sleep, strftime
-import getpass 
+import getpass
+from random import randrange
 
-# Remaining:-
-# fixing sleep timers - replace with wait for element visibility
-# handling errors
 
 class InstaBot:
     def __init__(self, username, password):
@@ -21,11 +18,7 @@ class InstaBot:
     def login(self):
         bot = self.bot
         bot.get("https://www.instagram.com/")
-        sleep(3)
-        
-        loginBtn = bot.find_element_by_css_selector("#react-root > section > main > article > div.rgFsT > div:nth-child(2) > p > a")
-        loginBtn.click()
-        sleep(1)
+        sleep(2)
 
         emailInput = bot.find_elements_by_css_selector('form input')[0]
         passwordInput = bot.find_elements_by_css_selector('form input')[1]
@@ -33,98 +26,118 @@ class InstaBot:
         passwordInput.clear()
         emailInput.send_keys(self.username)
         passwordInput.send_keys(self.password)
-        btnLogin = bot.find_element_by_css_selector("#react-root > section > main > div > article > div > div:nth-child(1) > div > form > div:nth-child(4)")
+        btnLogin = bot.find_element_by_xpath('//button[@type="submit"]')
         btnLogin.click()
-        sleep(4)
+        sleep(5)
 
-        notnow = bot.find_element_by_css_selector("body > div.RnEpo.Yx5HN > div > div > div.mt3GC > button.aOOlW.HoLwm")
+        notnow = bot.find_element_by_xpath(
+            "//button[contains(text(), 'Not Now')]")
+        notnow.click()
+        sleep(3)
+
+        notnow = bot.find_element_by_xpath(
+            "//button[contains(text(), 'Not Now')]")
         notnow.click()
 
-    def multifollow(self, accountName, max):
+    def multifollow(self, accountName):
         bot = self.bot
 
-        bot.get(f"https://www.instagram.com/{accountName}/")
-        sleep(3)
+        count = self._loadList(accountName)
+        list = self._scrollList(count)
 
-        followersBtn = bot.find_element_by_css_selector("#react-root > section > main > div > header > section > ul > li:nth-child(3) > a")
-        followersBtn.click()
-        sleep(3)
-
-        followersList = bot.find_element_by_css_selector('div[role=\'dialog\'] ul')
-        numberOfFollowersInList = len(followersList.find_elements_by_css_selector('li'))
-
-        followersList.click()
-        actionChain = webdriver.ActionChains(bot)
-        while (numberOfFollowersInList < max):
-            actionChain.key_down(Keys.SPACE).key_up(Keys.SPACE).perform()
-            sleep(2)
-            numberOfFollowersInList = len(followersList.find_elements_by_css_selector('li'))
-        
-        print(numberOfFollowersInList)
-
-        for user in followersList.find_elements_by_css_selector('li'):
+        for user in list.find_elements_by_css_selector('li'):
             userBtn = user.find_element_by_css_selector('button')
             if userBtn.text == "Follow":
                 userBtn.click()
-                sleep(3)
+                sleep(randrange(4) + 1)
             elif userBtn.text == "Following":
                 userBtn.click()
                 sleep(1)
-                bot.find_element_by_css_selector("button.aOOlW:nth-child(1)").click()
-                sleep(3)
+                bot.find_element_by_css_selector(
+                    "button.aOOlW:nth-child(1)").click()
+                sleep(randrange(4) + 1)
+            elif userBtn.text == "Requested":
+                userBtn.click()
+                sleep(1)
+                bot.find_element_by_css_selector(
+                    "button.aOOlW:nth-child(1)").click()
+                sleep(randrange(4) + 1)
 
-        # buttonList = bot.find_element_by_css_selector('div[role=\'dialog\'] button') #old method
-        closeBtn = bot.find_element_by_css_selector('[aria-label=Close]')
-        closeBtn.click()
+        self._closeList()
 
-    def getFollowerList(self, accountName, max):
+    def getFollowerList(self, accountName):
+        count = self._loadList(accountName)
+        list = self._scrollList(count)
+        #  Get Data Mining of followers User Account Urls
+        following = []
+        for user in list.find_elements_by_css_selector('li'):
+            userLink = user.find_element_by_css_selector(
+                'a').get_attribute('href')
+            # print(userLink)
+            following.append(userLink)
+            if (len(following) == count):
+                break
+
+        #  Print to an external file
+        print(following)
+        print(len(following))
+        #  Complete Data Mining of followers User Account Urls
+
+        self._closeList()
+
+    def _loadList(self, accountName):
         bot = self.bot
 
         bot.get(f"https://www.instagram.com/{accountName}/")
         sleep(3)
 
-        followersBtn = bot.find_element_by_css_selector("#react-root > section > main > div > header > section > ul > li:nth-child(3) > a")
-        followersBtn.click()
+        following_button = bot.find_element_by_xpath(
+            "//a[contains(@href,'/following')]/span")
+        following_button.click()
+        count = int(following_button.text)
+        # print(count)
+
         sleep(3)
+        return count
 
-        followersList = bot.find_element_by_css_selector('div[role=\'dialog\'] ul')
-        numberOfFollowersInList = len(followersList.find_elements_by_css_selector('li'))
+    def _scrollList(self, count):
+        bot = self.bot
 
-        followersList.click()
+        list = bot.find_element_by_xpath("//div[@role='dialog']")
+        list.click()
+
+        links = list.find_elements_by_xpath("//li")
+        loaded_names_count = len(links)
+
         actionChain = webdriver.ActionChains(bot)
-        while (numberOfFollowersInList < max):
+        while (loaded_names_count < count):
             actionChain.key_down(Keys.SPACE).key_up(Keys.SPACE).perform()
-            sleep(2)
-            numberOfFollowersInList = len(followersList.find_elements_by_css_selector('li'))
-        
-        # print(numberOfFollowersInList)
-        
-        #  Get Data Mining of followers User Account Urls
-        followers = []
-        for user in followersList.find_elements_by_css_selector('li'):
-            userLink = user.find_element_by_css_selector('a').get_attribute('href')
-            print(userLink)
-            followers.append(userLink)
-            if (len(followers) == max):
-                break
-        # print(followers) - add to external file instead
+            sleep(randrange(2) + 1)
+            links = list.find_elements_by_xpath("//li")
+            loaded_names_count = len(links)
 
+        sleep(4)
+        return list
+
+    def _closeList(self):
+        bot = self.bot
         closeBtn = bot.find_element_by_css_selector('[aria-label=Close]')
         closeBtn.click()
 
     def logout(self):
         bot = self.bot
 
-        profile = bot.find_element_by_css_selector('[aria-label=Profile]')
-        profile.click()
+        bot.get(f'https://www.instagram.com/{self.username}/')
         sleep(3)
 
-        settings = bot.find_element_by_css_selector('#react-root > section > main > div > header > section > div.nZSzR > div > button > span')
+        settings = bot.find_element_by_css_selector('[aria-label=Options]')
         settings.click()
         sleep(2)
 
-        logOut = bot.find_element_by_css_selector('body > div.RnEpo.Yx5HN > div > div > div > button:nth-child(8)')
+        logOut = bot.find_element_by_xpath(
+            "//button[contains(text(), 'Log Out')]")
         logOut.click()
+        sleep(2)
 
     def closeBrowser(self):
         self.bot.close()
@@ -132,32 +145,29 @@ class InstaBot:
     def __exit__(self, exc_type, exc_value, traceback):
         self.closeBrowser()
 
+
 try:
     username = input("Username: ")
-    password = getpass.getpass()    
-    accountId = input("Account ID to crawl: ")
-    followerNo = input("No. of Followings of that Account: ")
-    choice = int(input("Enter 1 for multifollow or 2 for getting Following URL List: "))
+    password = getpass.getpass()
+    accountId = input("Account ID/Username to crawl: ")
+    choice = int(
+        input(f"Enter 1 for Multifollow (Use with Caution) or 2 for getting Followers URL List of '{accountId}'"))
 
-    print("Automating your insta life...wait!!")    
-    botCrawl = InstaBot(username,password)
+    print("Automating your insta life...wait!!")
+    botCrawl = InstaBot(username, password)
     botCrawl.login()
 
     if(choice == 1):
-        botCrawl.multifollow(accountId,int(followerNo))
+        botCrawl.multifollow(accountId)
     elif(choice == 2):
-        botCrawl.getFollowerList(accountId,int(followerNo))
+        botCrawl.getFollowerList(accountId)
     else:
         botCrawl.logout()
         botCrawl.closeBrowser()
         raise ValueError("Please select 1 or 2")
 
-
     botCrawl.logout()
     botCrawl.closeBrowser()
-    
-except Exception as error: 
-    print('ERROR', error)
 
-    
-    
+except Exception as error:
+    print('ERROR', error)
