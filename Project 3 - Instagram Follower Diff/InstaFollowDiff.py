@@ -93,8 +93,7 @@ class InstaFollowDiff:
             names.append(userLink)
             if (len(names) == count):
                 break
-        # nameList = list.find_elements_by_tag_name('a')
-        # names = [name.text for name in nameList if name.text != '']
+                
         # close button
         closeBtn = bot.find_element_by_css_selector('[aria-label=Close]')
         closeBtn.click()
