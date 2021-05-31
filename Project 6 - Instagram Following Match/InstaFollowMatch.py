@@ -4,6 +4,7 @@ from time import sleep, strftime
 import getpass
 from random import randrange
 import csv
+import yaml
 
 
 class UserDetails:
@@ -138,12 +139,33 @@ class FinalDetails:
 
 
 try:
-    print("Enter the Instagram Accounts to Compare")
-    username1 = input("Username of Account 1: ")
-    password1 = getpass.getpass()
+    choice = input("Pick from credential file - y/n?: ")
+    if choice == "y":
+        with open('creds.yml') as f:
+            creds = yaml.load(f, Loader=yaml.FullLoader)
+            choice = input("Which Account? - a/b/c: ")
+            if choice == "a":
+                username1 = creds["username"]
+                password1 = creds["password"]
+                username2 = creds["username2"]
+                password2 = creds["password2"]
+            elif choice == "b":
+                username1 = creds["username"]
+                password1 = creds["password"]
+                username2 = creds["username3"]
+                password2 = creds["password3"]
+            else:
+                username1 = creds["username2"]
+                password1 = creds["password2"]
+                username2 = creds["username3"]
+                password2 = creds["password3"]
+    else:
+        print("Enter the Instagram Accounts to Compare")
+        username1 = input("Username of Account 1: ")
+        password1 = getpass.getpass()
 
-    username2 = input("Username of Account 2: ")
-    password2 = getpass.getpass()
+        username2 = input("Username of Account 2: ")
+        password2 = getpass.getpass()
 
     print("Automating your insta life...wait!!")
     botCrawl = UserDetails()
