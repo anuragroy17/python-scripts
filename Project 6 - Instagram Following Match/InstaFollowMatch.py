@@ -30,7 +30,7 @@ class UserDetails:
         passwordInput.send_keys(password)
         btnLogin = bot.find_element_by_xpath('//button[@type="submit"]')
         btnLogin.click()
-        sleep(5)
+        sleep(8)
 
         notnow = bot.find_element_by_xpath(
             "//button[contains(text(), 'Not Now')]")
@@ -79,6 +79,9 @@ class UserDetails:
             sleep(randrange(2) + 1)
             links = list.find_elements_by_xpath("//li")
             loaded_names_count = len(links)
+            # print(loaded_names_count, count)
+            if(loaded_names_count > 350):
+                break
 
         sleep(4)
 
