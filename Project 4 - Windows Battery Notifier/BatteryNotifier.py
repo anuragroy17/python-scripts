@@ -17,9 +17,12 @@ count = 0
 
 
 def showToastrNotifications(text):
-    toaster.show_toast(text, icon_path='battery_icon.ico', duration=10) # For same folder
-    # toaster.show_toast(text, icon_path="C://battery_icon.ico', duration=10) # Full path
-	
+    # For same folder, use for debugging
+    toaster.show_toast(text, icon_path='battery_icon.ico', duration=10)
+
+    # Full path, use when using locally on windows
+    # toaster.show_toast(text, icon_path="C://battery_icon.ico", duration=10)
+
     # looping the toaster for some period of time
     while toaster.notification_active():
         time.sleep(0.1)
