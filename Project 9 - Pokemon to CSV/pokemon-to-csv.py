@@ -19,6 +19,7 @@ for gen in generations:
         numbers = [int(s) for s in pokemon['url'].split("/") if s.isdigit()]
         pokemon['number'] = str(numbers[-1]).rjust(n, pad)
         del pokemon['url']
+        pokemon['name'] = pokemon['name'].capitalize()
         pokemon['sprite'] = f'https://assets.pokemon.com/assets/cms2/img/pokedex/detail/{pokemon["number"]}.png'
 
     keys = pokemons[0].keys()
